@@ -16,19 +16,35 @@ class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+
+    if (parsedContacts) {
+      this.setState({contacts: parsedContacts})
+    }
+  }
+
+  componentDidUpdate(prevState) {
+    const { contacts } = this.state;
+
+    if (contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(contacts))
+    }
+  }
+
   addContact = (name, number) => {
+    const { contacts } = this.state;
 
-const { contacts } = this.state;
+    if (contacts.find(contact => contact.name === name)) {
+      Report.warning('Warning!', `${name} is already in contacts.`, 'Okay');
+      return;
+    }
 
-if (contacts.find(contact => contact.name === name)) {
-  Report.warning('Warning!', `${name} is already in contacts.`, 'Okay');
-  return;
-}
-
-if (contacts.find(contact => contact.number === number)) {
-  Report.warning('Warning!', `${number} is already in contacts.`, 'Okay');
-  return;
-}
+    if (contacts.find(contact => contact.number === number)) {
+      Report.warning('Warning!', `${number} is already in contacts.`, 'Okay');
+      return;
+    }
 
     const newContact = {
       id: nanoid(),
@@ -59,6 +75,8 @@ if (contacts.find(contact => contact.number === number)) {
       contacts: contacts.filter(contact => contact.id !== contactId),
     }));
   };
+
+
 
   render() {
     const { filter } = this.state;
